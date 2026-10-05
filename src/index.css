@@ -159,6 +159,12 @@
 
 /* Sidebar High-Contrast Typography & Background Guarantee */
 aside#appSidebar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  height: 100vh !important;
+  height: 100dvh !important;
   width: 244px !important;
   min-width: 244px !important;
   max-width: 244px !important;
@@ -168,13 +174,24 @@ aside#appSidebar {
   display: flex !important;
   flex-direction: column !important;
   flex-shrink: 0 !important;
-  position: sticky !important;
-  top: 0 !important;
-  height: 100vh !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
   transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.22s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
   z-index: 100 !important;
+}
+
+main {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  width: calc(100% - 244px) !important;
+  margin-left: 244px !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  transition: margin-left 0.22s cubic-bezier(0.4, 0, 0.2, 1), width 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 aside#appSidebar .logo {
@@ -322,6 +339,12 @@ aside#appSidebar .nav a::before {
 }
 
 body.sidebar-collapsed aside#appSidebar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  height: 100vh !important;
+  height: 100dvh !important;
   width: 72px !important;
   min-width: 72px !important;
   max-width: 72px !important;
@@ -329,6 +352,11 @@ body.sidebar-collapsed aside#appSidebar {
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
   overflow-x: hidden !important;
+}
+
+body.sidebar-collapsed main {
+  margin-left: 72px !important;
+  width: calc(100% - 72px) !important;
 }
 
 body.sidebar-collapsed aside#appSidebar::-webkit-scrollbar {
@@ -743,7 +771,7 @@ button,input,textarea,select{font:inherit}
 button:focus-visible,.btn:focus-visible,.action-btn:focus-visible,.article-link:focus-visible,.chip:focus-visible,.nav a:focus-visible,.geo-step:focus-visible,.pub-filter-option:focus-visible,.media-library-tab:focus-visible{outline:0;box-shadow:var(--focus-ring)!important}
 
 /* Sidebar */
-aside#appSidebar{width:var(--sidebar-w);padding-top:16px;background:var(--sidebar-bg);transition:width .22s ease,box-shadow .22s ease;display:flex;flex-direction:column}
+
 .logo{padding:0 16px 16px;gap:11px;min-height:48px}.logo i{flex:0 0 32px;width:32px;height:32px;border-radius:11px}.brand-text{display:flex;flex-direction:column;min-width:0;line-height:1.15}.brand-text b{font-size:16px;color:#fff;white-space:nowrap}.brand-text small{font-size:9.5px;letter-spacing:.85px;color:#8fb8a2;margin-top:4px;font-weight:600;white-space:nowrap;text-transform:uppercase}
 .nt{padding-top:14px;padding-bottom:6px;font-size:10px;font-weight:800;color:#5f8a73}
 .nav a{position:relative;margin:3px 9px;padding:9px 11px;border-radius:10px;min-height:39px}.nav a::after{content:"";position:absolute;left:-9px;top:10px;bottom:10px;width:3px;border-radius:0 5px 5px 0;background:var(--primary-hover-border);opacity:0;transform:scaleY(.55);transition:.18s}.nav a.on::after{opacity:1;transform:scaleY(1)}.nav a.on{background:linear-gradient(96deg,rgba(var(--primary-rgb),.92),rgba(var(--primary-rgb),.88));box-shadow:0 7px 20px rgba(5,95,70,.24)}
@@ -1011,15 +1039,47 @@ tbody tr:hover td{background:#f4faf7}
 #root {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
-  overflow-x: hidden;
+  position: relative;
+  background: var(--bg);
 }
 main {
   flex: 1 1 auto;
   min-width: 0;
-  width: 100%;
+  width: calc(100% - 244px);
+  margin-left: 244px;
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  transition: margin-left 0.22s cubic-bezier(0.4, 0, 0.2, 1), width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+body.sidebar-collapsed main {
+  margin-left: 72px;
+  width: calc(100% - 72px);
+}
+@media (max-width: 1000px) {
+  aside#appSidebar {
+    width: 76px !important;
+    min-width: 76px !important;
+    max-width: 76px !important;
+  }
+  main {
+    margin-left: 76px !important;
+    width: calc(100% - 76px) !important;
+  }
+}
+@media (max-width: 760px) {
+  aside#appSidebar {
+    width: 68px !important;
+    min-width: 68px !important;
+    max-width: 68px !important;
+  }
+  main {
+    margin-left: 68px !important;
+    width: calc(100% - 68px) !important;
+  }
 }
 header {
   position: sticky;
