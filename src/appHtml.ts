@@ -44,7 +44,6 @@ export const appHtml = `<aside id="appSidebar"><div class="logo"><div style="wid
   <!-- Top Welcome & Tutorial Bar -->
   <div class="dash-welcome-bar">
     <div class="dash-welcome-left">
-      <span class="dash-welcome-text">欢迎来到 Lumos AI~</span>
       <button class="dash-tutorial-btn" id="dashTutorialBtn" type="button">
         <span>📄</span> 系统教程
       </button>
