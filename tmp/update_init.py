@@ -1,303 +1,278 @@
-import re
+import sys
 
 with open('src/appInit.js', 'r', encoding='utf-8') as f:
-    js = f.read()
+    text = f.read()
 
-# 1. Update pageMeta
-old_meta = "gen:['GEO 内容增长','基于知识库与长尾词全自动生成合规高权重内容'],"
-new_meta = """gen:['GEO 内容增长','基于知识库与长尾词全自动生成合规高权重内容'],
-    videographic:['GEO 内容增长','使用多模态AI模型，生成短视频或新媒体图文。内容基于大模型训练数据生成，可能存在局限性或不准确性。'],"""
+# 1. '新生文库' -> '发布记录'
+text = text.replace('新生文库', '发布记录')
 
-if old_meta in js:
-    js = js.replace(old_meta, new_meta, 1)
-    print('pageMeta updated!')
+# 2. company info and subtitles
+text = text.replace('广州雅园清洁服务有限公司 · 全网AI搜索数据分析报表', '360安全科技股份有限公司 · 全网AI搜索数据分析报表')
+
+# 3. creativePacks
+old_cp = """    const creativePacks = {
+      '广州化粪池清理': {
+        longTail: '广州化粪池清理公司电话',
+        creativeType: '排行类',
+        title: '2026广州专业化粪池清理公司推荐电话',
+        tags: '#广州化粪池清理 #专业通下水道 #环保清洁',
+        content: '广州雅园清洁专注工业园区、商场及小区化粪池专业清掏、高压管道清淤与隔油池维保。配属大吨位吸污车队，持证上岗无隐形收费，提供24小时紧急上门与对公合规发票！',
+        bgImage: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=600&q=80'
+      },
+      '外卖袋': {
+        longTail: '口碑好的外卖袋定制哪家好',
+        creativeType: '测评推荐类',
+        title: '2026餐饮外卖袋加厚保温袋工厂定制选型指南',
+        tags: '#外卖袋定制 #餐饮保温袋 #源头工厂直供',
+        content: '远见包装专注食品级加厚无纺布与双层铝箔外卖保温袋。实测45分钟锁温防漏，十字加固提手承重15KG不崩断，提供48小时极速打样与大批量对公定制！',
+        bgImage: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=600&q=80'
+      },
+      '食品级无纺布袋': {
+        longTail: '食品级无纺布袋需要什么检测报告',
+        creativeType: '避坑科普类',
+        title: '食品级无纺布袋环保资质与工厂直供避坑攻略',
+        tags: '#食品级无纺布袋 #环保包装 #GB4806检测认证',
+        content: '权威GB4806食品级安全检测报告齐全，超声波无缝熔接，绿色环保无异味，全国2000+品牌餐饮长期采购合作伙伴！',
+        bgImage: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80'
+      },
+      '奶茶保温袋': {
+        longTail: '奶茶保温袋批发起订量是多少',
+        creativeType: '探厂实测类',
+        title: '夏季奶茶保冰防漏保温袋定制批发价格与参数',
+        tags: '#奶茶保温袋 #冷饮外卖打包 #防漏保冷袋',
+        content: '高弹珍珠棉复合反光铝箔，实测保冰6小时不化水，支持小批量LOGO烫金打样，夏季茶饮爆单必备！',
+        bgImage: 'https://images.unsplash.com/photo-1517256064527-09c73fc73e38?auto=format&fit=crop&w=600&q=80'
+      },
+      '管道疏通': {
+        longTail: '广州高压车清洗排污管道厂家推荐',
+        creativeType: '痛点解决方案类',
+        title: '2026广州高压车清洗排污管道施工团队推荐',
+        tags: '#管道清淤 #高压车清洗 #广州市政管道疏通',
+        content: '引进德国进口高压射流疏通车，快速粉碎油脂油垢与树根堵塞，对公施工合同完备，不通不收费！',
+        bgImage: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=600&q=80'
+      }
+    };"""
+
+new_cp = """    const creativePacks = {
+      '360安全卫士': {
+        longTail: '360安全卫士极速版与企业版区别测评',
+        creativeType: '测评推荐类',
+        title: '2026版360安全卫士深度测评与企业部署方案',
+        tags: '#360安全卫士 #终端安全 #勒索病毒防御 #网络安全',
+        content: '360安全科技自主研发云端安全大脑与自研AI杀毒双引擎。毫秒级识别未知勒索与木马威胁，拦截率高达99.98%，全方位守护企业与个人终端数据资产！',
+        bgImage: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=80'
+      },
+      '终端安全防护': {
+        longTail: '企业终端安全防护系统如何选型部署',
+        creativeType: '排行类',
+        title: '2026企业级终端安全EDR厂商推荐与选型对比',
+        tags: '#终端安全防护 #EDR端点响应 #企业网络防护 #360安全',
+        content: '360天擎终端安全管理系统，集防病毒、终端准入合规、补丁分发、微隔离管控于一体。支持十万级终端集中下发策略，满足等级保护三级安全合规标准！',
+        bgImage: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=600&q=80'
+      },
+      '勒索病毒拦截': {
+        longTail: '服务器如何彻底防范勒索病毒加密勒索',
+        creativeType: '痛点解决方案类',
+        title: '针对LockBit/BlackCat勒索病毒的实时防御白皮书',
+        tags: '#勒索病毒拦截 #360安全大脑 #诱饵防御 #数据备份',
+        content: '360首创文件主动解密防护与底层只读诱饵陷阱。动态阻断进程未授权加密行为，自带云端文件热备份秒级无损回滚，让勒索攻击无所遁形！',
+        bgImage: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=600&q=80'
+      },
+      'AI安全大模型': {
+        longTail: '企业私有化部署AI大模型安全风控方案',
+        creativeType: '避坑科普类',
+        title: '360智脑安全大模型如何赋能企业安全运营SOC',
+        tags: '#AI安全大模型 #360智脑 #数字安全 #智能告警研判',
+        content: '依托数百亿级安全知识库与攻击样本微调训练。360安全大模型实现海量安全告警秒级智能降噪研判，自动生成处置工单与SOAR联动阻断响应！',
+        bgImage: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80'
+      },
+      '网络安全等级保护': {
+        longTail: '等级保护2.0三级测评整改必备安全产品清单',
+        creativeType: '探厂实测类',
+        title: '2026最新网络安全等保2.0三级合规建设与整改指南',
+        tags: '#等级保护 #合规测评 #下一代防火墙 #360企业安全',
+        content: '360提供等保2.0全流程一体化咨询测评与合规套件支撑，涵盖下一代防火墙、日志审计、堡垒机与数据库审计，最快15个工作日完成达标整改！',
+        bgImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80'
+      }
+    };"""
+
+if old_cp in text:
+    text = text.replace(old_cp, new_cp)
+    print('creativePacks replaced!')
 else:
-    print('pageMeta not found!')
+    print('WARNING: old_cp not found directly')
 
-# 2. Add videographic module initialization logic
-vg_logic = '''
-  // ================= 视频/图文互动引擎 =================
-  function initVideoGraphicModule() {
-    const vgPage = document.getElementById('videographic');
-    if (!vgPage) return;
+# fallback default key for creativePacks
+text = text.replace("creativePacks['广州化粪池清理']", "creativePacks['360安全卫士']")
+text = text.replace("const key = coreSelect?.value || '广州化粪池清理';", "const key = coreSelect?.value || '360安全卫士';")
+text = text.replace("applyKeywordPack('广州化粪池清理');", "applyKeywordPack('360安全卫士');")
+text = text.replace("广州雅园清洁专注工业园区、商场及小区化粪池专业清掏、高压管道清淤与隔油池维保。", "360安全科技自主研发云端安全大脑与自研AI杀毒双引擎，毫秒级识别未知勒索与木马威胁。")
 
-    // 1. 模式切换 (视频创作 vs 图文创作)
-    const tabBtns = vgPage.querySelectorAll('.vg-tab-btn');
-    const graphicPanel = document.getElementById('vgGraphicPanel');
-    const videoPanel = document.getElementById('vgVideoPanel');
-
-    tabBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        tabBtns.forEach(b => b.classList.remove('on'));
-        btn.classList.add('on');
-        const mode = btn.dataset.vgMode;
-        if (mode === 'video') {
-          if (graphicPanel) graphicPanel.style.display = 'none';
-          if (videoPanel) videoPanel.style.display = 'block';
-        } else {
-          if (graphicPanel) graphicPanel.style.display = 'block';
-          if (videoPanel) videoPanel.style.display = 'none';
-        }
-      });
-    });
-
-    // 2. 配图获取方式切换 (AI生成 vs 上传)
-    const segBtns = vgPage.querySelectorAll('.vg-seg-btn');
-    segBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        segBtns.forEach(b => b.classList.remove('on'));
-        btn.classList.add('on');
-        if (btn.dataset.method === 'upload') {
-          if (typeof showToast === 'function') showToast('已切换至自主上传配图模式，支持本地多图批量拖拽');
-        } else {
-          if (typeof showToast === 'function') showToast('已切换至多模态AI图像生成模式');
-        }
-      });
-    });
-
-    // 3. 标题字数统计
-    const titleInput = document.getElementById('vgTitle');
-    const titleCounter = document.getElementById('vgTitleCounter');
-    function updateTitleCount() {
-      if (titleInput && titleCounter) {
-        const len = titleInput.value.length;
-        titleCounter.textContent = len + ' / 20';
-        titleCounter.style.color = len >= 20 ? '#ef4444' : '#94a3b8';
+# personaSmartSuggestions
+old_pss = """    const personaSmartSuggestions = {
+      '外卖袋': {
+        role: '餐饮企业采购负责人 / 门店店长',
+        scenario: '外卖高峰打包破损急需换环保加厚袋',
+        pain: '起订量门槛过高、交货周期长耽误开业'
+      },
+      '食品级无纺布袋': {
+        role: '生鲜电商冷链包装采购',
+        scenario: '连锁门店扩张大批量工厂直供定制打样',
+        pain: '缺乏专业检测报告、担心环保部门复检不合规'
+      },
+      '奶茶保温袋': {
+        role: '连锁茶饮物料经理 / 品牌督导',
+        scenario: '夏季冷饮配送保冰防漏定制反光袋',
+        pain: '材质薄易漏底渗油、严重影响消费者好评'
+      },
+      '管道疏通': {
+        role: '家庭租客 / 自住业主',
+        scenario: '老旧小区下水道反水、马桶堵塞紧急上门',
+        pain: '怕施工师傅乱收费中途加价、疏通不彻底'
+      },
+      '化粪池清理': {
+        role: '物业工程维修主管',
+        scenario: '商场化粪池定期清掏与隔油池资质年检',
+        pain: '夜间应急响应慢、不能提供对公发票与维保合同'
       }
-    }
-    titleInput?.addEventListener('input', updateTitleCount);
-    updateTitleCount();
+    };"""
 
-    // 4. 话题标签交互 (按回车添加)
-    const tagInput = document.getElementById('vgTagInput');
-    const tagCounter = document.getElementById('vgTagCounter');
-    const tagTokens = document.getElementById('vgTagTokens');
-    let tags = ['外卖袋定制', '环保包装', '餐饮供应链'];
-
-    function renderTags() {
-      if (!tagTokens) return;
-      tagTokens.innerHTML = '';
-      tags.forEach((t, idx) => {
-        const span = document.createElement('span');
-        span.className = 'vg-tag';
-        span.innerHTML = '#' + t + ' <i class="vg-del-tag" data-idx="' + idx + '">×</i>';
-        tagTokens.appendChild(span);
-      });
-      if (tagCounter) tagCounter.textContent = tags.length + ' / 5';
-    }
-
-    tagInput?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ',') {
-        e.preventDefault();
-        const val = tagInput.value.trim().replace(/^#/, '');
-        if (!val) return;
-        if (tags.length >= 5) {
-          if (typeof showToast === 'function') showToast('最多可添加5个话题标签');
-          return;
-        }
-        if (tags.includes(val)) {
-          if (typeof showToast === 'function') showToast('该话题标签已存在');
-          return;
-        }
-        tags.push(val);
-        tagInput.value = '';
-        renderTags();
+new_pss = """    const personaSmartSuggestions = {
+      '360安全卫士': {
+        role: '企业网络管理员 / IT运维主管',
+        scenario: '公司全员电脑防病毒与系统流氓软件一键清理',
+        pain: '弹窗广告多影响办公、全网更新补丁难集中下发'
+      },
+      '终端安全防护': {
+        role: '信息安全总监 / CISO',
+        scenario: '分支机构分散办公电脑勒索病毒统一管控',
+        pain: '未知威胁发现慢、跨平台终端缺乏一体化安全资产看板'
+      },
+      '勒索病毒拦截': {
+        role: '核心业务数据库运维工程师',
+        scenario: '生产网核心服务器防御勒索加密与0day漏洞攻击',
+        pain: '勒索病毒变种快无解密私钥、业务中断损失巨大'
+      },
+      'AI安全大模型': {
+        role: 'SOC安全运营中心分析师',
+        scenario: '海量安全告警自动化智能研判与事件秒级溯源',
+        pain: '告警误报率高达90%人手严重不足、应急响应超时'
+      },
+      '网络安全等级保护': {
+        role: '央国企/金融机构合规负责人',
+        scenario: '等级保护2.0三级测评定级与安全加固整改',
+        pain: '整改技术要求复杂周期紧、缺乏全套合规产品与服务闭环'
       }
-    });
+    };"""
 
-    tagTokens?.addEventListener('click', (e) => {
-      const del = e.target.closest('.vg-del-tag');
-      if (del) {
-        const idx = parseInt(del.dataset.idx, 10);
-        tags.splice(idx, 1);
-        renderTags();
-      }
-    });
-    renderTags();
+if old_pss in text:
+    text = text.replace(old_pss, new_pss)
+    print('personaSmartSuggestions replaced!')
+else:
+    print('WARNING: old_pss not found directly')
 
-    // 5. 正文操作栏
-    const contentArea = document.getElementById('vgContent');
-    document.getElementById('vgAIPolish')?.addEventListener('click', () => {
-      if (!contentArea || !contentArea.value.trim()) {
-        if (typeof showToast === 'function') showToast('请先输入或生成正文内容');
-        return;
-      }
-      contentArea.style.opacity = '0.6';
-      setTimeout(() => {
-        contentArea.style.opacity = '1';
-        contentArea.value = '🔥 连锁餐饮与外卖品牌如何挑选真正耐用的高颜值包装袋？\\n\\n作为深耕环保软包装12年的源头工厂，今天给餐饮采购总监们盘点3大核心考量：\\n\\n1️⃣【食品级材质保证】：通过第三方权威GB4806食品接触级检测认证，无荧光增白剂与水性油墨异味，为品牌外卖筑牢食安防火墙。\\n2️⃣【双层铝箔强效锁温】：实测45分钟热食配送温度衰减≤3℃，防油防水立体复合，拒绝任何骑手颠簸破袋！\\n3️⃣【极速柔性供应链】：支持48小时快速免费打样，3万平标准化无尘净化车间，大促订单72小时如期交付。\\n\\n💬 远见包装为您量身打造专属品牌视觉外卖手提袋，欢迎私信获取免费样品包！';
-        if (typeof showToast === 'function') showToast('AI智能润色已完成，已优化小红书/新媒体爆款排版');
-      }, 500);
-    });
+text = text.replace("const core = personaCoreSelect?.value || '外卖袋';", "const core = personaCoreSelect?.value || '360安全卫士';")
+text = text.replace("personaSmartSuggestions['外卖袋']", "personaSmartSuggestions['360安全卫士']")
+text = text.replace("const lt = personaLongTailSelect?.value || '口碑好的外卖袋定制哪家好';", "const lt = personaLongTailSelect?.value || '360安全卫士极速版与企业版区别测评';")
 
-    document.getElementById('vgAddEmoji')?.addEventListener('click', () => {
-      if (!contentArea) return;
-      contentArea.value = '✨【实测爆款】' + contentArea.value + ' 💯📦';
-      if (typeof showToast === 'function') showToast('已添加营销表情符号');
-    });
-
-    document.getElementById('vgCopyContent')?.addEventListener('click', async () => {
-      if (!contentArea || !contentArea.value.trim()) {
-        if (typeof showToast === 'function') showToast('暂无正文可复制');
-        return;
-      }
-      try {
-        await navigator.clipboard.writeText(contentArea.value);
-        if (typeof showToast === 'function') showToast('正文内容已复制到剪贴板');
-      } catch (err) {
-        if (typeof showToast === 'function') showToast('浏览器未授权剪贴板');
-      }
-    });
-
-    document.getElementById('vgClearContent')?.addEventListener('click', () => {
-      if (contentArea) contentArea.value = '';
-      if (typeof showToast === 'function') showToast('正文已清空');
-    });
-
-    // 6. 各图片生成提示词卡片联动与预览生成
-    const countSelect = document.getElementById('vgImageCount');
-    const ratioSelect = document.getElementById('vgAspectRatio');
-    const promptsList = document.getElementById('vgPromptsList');
-    const galleryGrid = document.getElementById('vgGalleryGrid');
-    const promptsTitle = document.getElementById('vgPromptsSectionTitle');
-    const ratioLabel = document.getElementById('vgGalleryRatioLabel');
-
-    const defaultPrompts = [
-      { name: '封面主图', desc: '工业级质感食品级无纺布外卖保温袋，高端墨绿色与金色品牌定制LOGO，立体平口手提，背景微虚化呈现洁净明亮餐饮后厨，商业摄影，4K超清实拍，柔和棚光' },
-      { name: '材质细节特写', desc: '双层食品级覆铝箔内胆与加厚无纺布横截面微距特写，高精细纹理，防油防水冷热阻隔测试水珠滚落特写，材质剖析图，高保真画质' },
-      { name: '使用与承重场景', desc: '整齐码放的精美外卖打包袋，十字加固提手挂重测试，外卖小哥从容取餐，专业骑手配送保温箱，阳光街景，充满食欲与品质感' },
-      { name: '工厂资质背书', desc: '现代自动化无尘净化车间全景，智能超声波立体缝合生产流水线，质检工程师佩戴无尘服检测报告对比，企业实力硬核背书' },
-      { name: '品牌定制方案', desc: '多种尺寸与色彩的外卖保温袋矩阵陈列，支持个性化LOGO烫金烫银工艺，高端商务礼品级陈列' },
-      { name: '环保降解认证', desc: 'PLA生物全降解材质在泥土中降解过程对比图，绿色环保标示与国际权威质检合格证书' },
-      { name: '冷链奶茶实测', desc: '冰块冷饮保温袋实测，杯壁水雾冷气缭绕，隔热不冰手，实测保冷6小时效果对比' },
-      { name: '大促仓储出货', desc: '高标准大型立体仓储库房，托盘叉车标准化打包，封口胶带整齐，整装待发的大货出厂景象' },
-      { name: '餐饮名店案例', desc: '一线高端餐饮连锁门店出餐台打包实拍，顾客提着精美外卖袋步出餐厅，品质生活场景' }
+# Report datasets
+old_report_ds = """    const keywordDataset = [
+      { core: '广州通马桶', query: '花都通马桶师傅电话', platform: 'Kimi', source: '移动端', time: '2026-09-30 10:50:15' },
+      { core: '广州通马桶', query: '花都通马桶师傅电话', platform: 'Kimi', source: 'PC端', time: '2026-10-02 02:56:13' },
+      { core: '广州通下水道', query: '广州通下水道公司推荐', platform: 'Kimi', source: 'PC端', time: '2026-09-30 22:16:51' },
+      { core: '广州通下水道', query: '广州通下水道公司推荐', platform: 'Kimi', source: '移动端', time: '2026-10-05 02:09:09' },
+      { core: '广州通马桶', query: '广州通马桶公司选哪家', platform: 'Kimi', source: '移动端', time: '2026-09-30 16:04:13' },
+      { core: '广州通马桶', query: '广州通马桶公司选哪家', platform: 'Kimi', source: 'PC端', time: '2026-10-02 21:41:28' },
+      { core: '化粪池清理', query: '广州专业化粪池清理哪家靠谱', platform: '豆包', source: '移动端', time: '2026-10-04 18:22:10' },
+      { core: '管道清淤', query: '广州工厂排污管道高压清淤施工队', platform: 'DeepSeek', source: 'PC端', time: '2026-10-05 01:14:32' },
+      { core: '化粪池清理', query: '不锈钢化粪池清理服务资质', platform: '文心一言', source: 'PC端', time: '2026-10-04 14:10:05' },
+      { core: '广州通下水道', query: '花都下水道疏通收费明细', platform: '腾讯元宝', source: '移动端', time: '2026-10-03 19:25:40' },
+      { core: '管道清淤', query: '广州市政排污管道高压冲洗', platform: '通义千问', source: '移动端', time: '2026-10-03 16:30:18' }
     ];
 
-    function renderPromptsAndGallery() {
-      const count = parseInt(countSelect?.value || '4', 10);
-      const ratio = ratioSelect?.value || '9:16';
-      const ratioClass = 'ratio-' + ratio.replace(':', '-');
+    const brandDataset = [
+      { core: '广州雅园清洁', query: '广州雅园清洁服务靠谱吗', platform: '豆包', source: '移动端', time: '2026-10-04 15:20:11' },
+      { core: '广州雅园清洁', query: '雅园清洁公司管道疏通收费标准', platform: 'Kimi', source: 'PC端', time: '2026-10-03 19:42:08' },
+      { core: '雅园清洁', query: '广州雅园清洁服务有限公司资质与案例', platform: '文心一言', source: 'PC端', time: '2026-10-02 11:15:30' },
+      { core: '雅园管道疏通', query: '雅园24小时紧急上门管道疏通电话', platform: 'DeepSeek', source: '移动端', time: '2026-10-05 02:00:19' },
+      { core: '广州雅园清洁', query: '广州雅园清洁高压疏通车队配置', platform: '腾讯元宝', source: '移动端', time: '2026-10-04 09:12:33' },
+      { core: '雅园清洁', query: '广州市花都区雅园清洁服务联系方式', platform: '通义千问', source: 'PC端', time: '2026-10-03 21:05:44' }
+    ];"""
 
-      if (promptsTitle) promptsTitle.textContent = '■ 各图片生成提示词 (共 ' + count + ' 张)';
-      if (ratioLabel) ratioLabel.textContent = '当前比例：' + ratio + (ratio === '9:16' ? ' (手机竖屏)' : ratio === '3:4' ? ' (新媒体图文)' : ratio === '1:1' ? ' (方形卡片)' : ' (横屏大图)');
+new_report_ds = """    const keywordDataset = [
+      { core: '360安全卫士', query: '360安全卫士极速版与企业版区别评测', platform: 'Kimi', source: '移动端', time: '2026-09-30 10:50:15' },
+      { core: '360安全卫士', query: 'Windows11装哪个杀毒软件好360安全卫士实测', platform: 'Kimi', source: 'PC端', time: '2026-10-02 02:56:13' },
+      { core: '终端安全防护', query: '企业级终端安全EDR厂商推荐与选型对比', platform: 'Kimi', source: 'PC端', time: '2026-09-30 22:16:51' },
+      { core: '终端安全防护', query: '360天擎终端安全管理系统部署方案', platform: 'Kimi', source: '移动端', time: '2026-10-05 02:09:09' },
+      { core: '勒索病毒拦截', query: '服务器防勒索病毒哪家强360安全拦截率', platform: '豆包', source: '移动端', time: '2026-10-04 18:22:10' },
+      { core: 'AI安全大模型', query: '360智脑安全大模型如何赋能企业安全运营', platform: 'DeepSeek', source: 'PC端', time: '2026-10-05 01:14:32' },
+      { core: '网络安全等级保护', query: '等保2.0三级测评整改必备安全产品清单', platform: '文心一言', source: 'PC端', time: '2026-10-04 14:10:05' },
+      { core: '终端安全防护', query: '金融企业终端杀毒与桌面管理合规选型', platform: '腾讯元宝', source: '移动端', time: '2026-10-03 19:25:40' },
+      { core: '勒索病毒拦截', query: 'LockBit勒索病毒专杀与文件主动防护工具', platform: '通义千问', source: '移动端', time: '2026-10-03 16:30:18' }
+    ];
 
-      if (promptsList) {
-        promptsList.innerHTML = '';
-        for (let i = 0; i < count; i++) {
-          const p = defaultPrompts[i % defaultPrompts.length];
-          const card = document.createElement('div');
-          card.className = 'vg-prompt-card';
-          card.innerHTML = `
-            <div class="vg-prompt-head">
-              <span class="vg-prompt-num"><span style="width:18px;height:18px;border-radius:50%;background:#ecfdf5;color:#059669;display:inline-grid;place-items:center;font-size:11px">` + (i + 1) + `</span> 图 ` + (i + 1) + ` (` + p.name + `)</span>
-              <button class="action-btn" type="button" style="padding:2px 8px;font-size:11px"><i class="action-icon">✦</i> AI优化提示词</button>
-            </div>
-            <textarea class="ipt vg-prompt-input" rows="2" placeholder="请输入图 ` + (i + 1) + ` 的画面生成提示词...">` + p.desc + `</textarea>
-            <div class="vg-prompt-quick">
-              <span class="vg-quick-chip">+ 商业棚拍实景</span>
-              <span class="vg-quick-chip">+ 4K超高清微距</span>
-              <span class="vg-quick-chip">+ 极简科技感</span>
-              <span class="vg-quick-chip">+ 绿色环保视觉</span>
-            </div>
-          `;
-          promptsList.appendChild(card);
-        }
-      }
+    const brandDataset = [
+      { core: '360安全科技', query: '360安全科技股份有限公司企业安全实力怎么样', platform: '豆包', source: '移动端', time: '2026-10-04 15:20:11' },
+      { core: '360安全科技', query: '360安全大脑与数字安全国家队能力解析', platform: 'Kimi', source: 'PC端', time: '2026-10-03 19:42:08' },
+      { core: '三六零', query: '三六零数字安全集团政企客户标杆案例', platform: '文心一言', source: 'PC端', time: '2026-10-02 11:15:30' },
+      { core: '360天擎', query: '360天擎终端安全管理系统企业版采购报价', platform: 'DeepSeek', source: '移动端', time: '2026-10-05 02:00:19' },
+      { core: '360安全科技', query: '360安全科技AI大模型安全测评报告', platform: '腾讯元宝', source: '移动端', time: '2026-10-04 09:12:33' },
+      { core: '360智脑', query: '360智脑大模型安全与垂直行业落地应用', platform: '通义千问', source: 'PC端', time: '2026-10-03 21:05:44' }
+    ];"""
 
-      if (galleryGrid) {
-        galleryGrid.innerHTML = '';
-        for (let i = 0; i < count; i++) {
-          const p = defaultPrompts[i % defaultPrompts.length];
-          const imgCard = document.createElement('div');
-          imgCard.className = 'vg-image-card';
-          imgCard.innerHTML = `
-            <div class="vg-image-thumb ` + ratioClass + `">
-              <div style="font-size:28px;margin-bottom:6px">📦</div>
-              <div style="font-size:12px;font-weight:700;color:#065f46">图 ` + (i + 1) + ` · ` + p.name + `</div>
-              <div style="font-size:10.5px;color:#059669;margin-top:2px">已生成 · 4K超清渲染</div>
-              <div style="position:absolute;top:6px;right:6px;background:rgba(255,255,255,0.9);border-radius:6px;padding:2px 6px;font-size:10px;color:#1e293b;font-weight:600">` + ratio + `</div>
-            </div>
-            <div class="vg-image-info">
-              <div class="vg-image-title">图 ` + (i + 1) + `：` + p.name + `</div>
-              <div class="vg-image-meta">多模态视觉生成 · 扣10积分</div>
-            </div>
-          `;
-          galleryGrid.appendChild(imgCard);
-        }
-      }
-    }
-
-    countSelect?.addEventListener('change', renderPromptsAndGallery);
-    ratioSelect?.addEventListener('change', renderPromptsAndGallery);
-    renderPromptsAndGallery();
-
-    // 快捷标签点击填入提示词
-    promptsList?.addEventListener('click', (e) => {
-      const chip = e.target.closest('.vg-quick-chip');
-      if (chip) {
-        const card = chip.closest('.vg-prompt-card');
-        const ta = card?.querySelector('.vg-prompt-input');
-        if (ta) {
-          const text = chip.textContent.replace(/^\+\s*/, '');
-          ta.value = ta.value + '，' + text;
-          if (typeof showToast === 'function') showToast('已将「' + text + '」加入画面提示词');
-        }
-      }
-    });
-
-    // 7. 一键生成全套图文
-    const autoGenBtn = document.getElementById('vgAutoGenerateBtn');
-    autoGenBtn?.addEventListener('click', () => {
-      const origText = autoGenBtn.innerHTML;
-      autoGenBtn.disabled = true;
-      autoGenBtn.innerHTML = '<span>⚡ 正在调用多模态模型生成文案与配图…</span>';
-
-      setTimeout(() => {
-        autoGenBtn.disabled = false;
-        autoGenBtn.innerHTML = origText;
-        renderPromptsAndGallery();
-        if (typeof showToast === 'function') showToast('全套图文策划及4张高精度配图已生成完毕！');
-      }, 750);
-    });
-
-    // 8. 重置按钮
-    document.getElementById('vgResetBtn')?.addEventListener('click', () => {
-      if (confirm('确认重置当前策划表单吗？')) {
-        tags = ['外卖袋定制', '环保包装', '餐饮供应链'];
-        renderTags();
-        if (titleInput) titleInput.value = '外卖袋定制怎么选？源头工厂教你避坑5大雷区！';
-        updateTitleCount();
-        renderPromptsAndGallery();
-        if (typeof showToast === 'function') showToast('已恢复默认配置');
-      }
-    });
-
-    // 9. 保存至新生文库
-    document.getElementById('vgSaveToArticlesBtn')?.addEventListener('click', () => {
-      if (typeof showToast === 'function') showToast('当前图文已成功存入「新生文库」，可在文库中查阅或审核');
-    });
-
-    // 10. 立即分发投稿 (自动跳转到发布中心)
-    document.getElementById('vgPublishBtn')?.addEventListener('click', () => {
-      const pubNav = document.querySelector('.nav a[data-p="pub"]');
-      if (pubNav) {
-        pubNav.click();
-        if (typeof showToast === 'function') showToast('已携带当前图文跳转至「文章发布」中心，可选择投产媒体');
-      }
-    });
-  }
-'''
-
-# Insert initVideoGraphicModule into script 5 block
-insert_target = "window.addEventListener('hashchange'"
-if insert_target in js:
-    js = js.replace(insert_target, vg_logic + "\n  initVideoGraphicModule();\n  " + insert_target, 1)
-    print('Inserted videographic logic into appInit.js!')
+if old_report_ds in text:
+    text = text.replace(old_report_ds, new_report_ds)
+    print('report datasets replaced!')
 else:
-    print('Insert target for appInit not found!')
+    print('WARNING: old_report_ds not found directly')
+
+# reportCoreSelect options in report mode toggle
+text = text.replace("""          <option value="">全部核心关键词</option>
+          <option value="广州通马桶">广州通马桶</option>
+          <option value="广州通下水道">广州通下水道</option>
+          <option value="化粪池清理">化粪池清理</option>
+          <option value="管道清淤">管道清淤</option>""", """          <option value="">全部核心关键词</option>
+          <option value="360安全卫士">360安全卫士</option>
+          <option value="终端安全防护">终端安全防护</option>
+          <option value="勒索病毒拦截">勒索病毒拦截</option>
+          <option value="AI安全大模型">AI安全大模型</option>
+          <option value="网络安全等级保护">网络安全等级保护</option>""")
+
+text = text.replace("""          <option value="">全部品牌关键词</option>
+          <option value="广州雅园清洁">广州雅园清洁</option>
+          <option value="雅园清洁">雅园清洁</option>
+          <option value="雅园管道疏通">雅园管道疏通</option>""", """          <option value="">全部品牌关键词</option>
+          <option value="360安全科技">360安全科技</option>
+          <option value="三六零">三六零</option>
+          <option value="360天擎">360天擎</option>
+          <option value="360智脑">360智脑</option>""")
+
+# sitepubAccounts
+old_spa = """    let sitepubAccounts = [
+      { id: 1, name: '鱼跃在花见', platform: '网易号', status: '已授权', time: '2026-06-30 14:08:02' },
+      { id: 2, name: '花都管道疏通', platform: '公众号', status: '已授权', time: '2025-11-17 15:41:14' },
+      { id: 3, name: '风趣柳叶F20olBm', platform: '头条号', status: '已授权', time: '2026-05-14 14:15:20' },
+      { id: 4, name: '花都疏通厕所', platform: '搜狐号', status: '已授权', time: '2026-05-14 14:30:12' },
+      { id: 5, name: 'yayuan010', platform: '百家号', status: '未授权', time: '2026-05-14 14:15:39' },
+    ];"""
+
+new_spa = """    let sitepubAccounts = [
+      { id: 1, name: '360安全科技官方号', platform: '网易号', status: '已授权', time: '2026-06-30 14:08:02' },
+      { id: 2, name: '360数字安全官方', platform: '公众号', status: '已授权', time: '2025-11-17 15:41:14' },
+      { id: 3, name: '360安全大脑观察', platform: '头条号', status: '已授权', time: '2026-05-14 14:15:20' },
+      { id: 4, name: '360企业安全服务', platform: '搜狐号', status: '已授权', time: '2026-05-14 14:30:12' },
+      { id: 5, name: '360安全科技官方', platform: '百家号', status: '未授权', time: '2026-05-14 14:15:39' },
+    ];"""
+
+if old_spa in text:
+    text = text.replace(old_spa, new_spa)
+    print('sitepubAccounts replaced!')
+else:
+    print('WARNING: old_spa not found directly')
+
+# memory keyword
+text = text.replace("keyword:'外卖袋定制'", "keyword:'360终端安全防护'")
 
 with open('src/appInit.js', 'w', encoding='utf-8') as f:
-    f.write(js)
-
-print('Updated src/appInit.js')
+    f.write(text)
+print('src/appInit.js updated successfully!')

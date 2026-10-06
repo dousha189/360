@@ -1,6 +1,6 @@
 {
   "name": "360智见GEO · 企业AI搜索可见性优化平台",
-  "description": "360智见GEO企业AI搜索可见性优化平台，提供品牌诊断、收录查询、企业知识库、人群画像、关键词挖掘、内容创作、新生文库、文章发布与Agent运行日志等全链路GEO增长能力。",
+  "description": "360智见GEO企业AI搜索可见性优化平台，提供首页概览、收录查询、企业知识库、人群画像、关键词挖掘、内容创作、发布记录、文章发布与我的套餐等全链路GEO增长能力。",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
